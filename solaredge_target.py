@@ -62,18 +62,33 @@ def get_metrics_class(solar):
 
             for site in data:
                 for meter in data[site]:
+                    data[site][meter].sort(key=lambda x: x["date"])
+
                     for measurement in data[site][meter]:
                         ts = datetime.datetime.strptime(
                             measurement["date"], "%Y-%m-%d %H:%M:%S"
                         ).timestamp()
 
                         v = 0
-                        if 'value' in measurement:
-                            v = measurement['value']
+                        if "value" in measurement:
+                            v = measurement["value"]
 
                         self.wfile.write(
                             bytes(
                                 f'solar_production{{site="{site}", meter="{meter}"}} {v} {ts}\n',
+                                "utf-8",
+                            )
+                        )
+
+                    if len(data[site][meter]):
+                        measurement = data[site][meter][-1]
+                        v = 0
+                        if "value" in measurement:
+                            v = measurement["value"]
+
+                        self.wfile.write(
+                            bytes(
+                                f'solar_production{{site="{site}", meter="{meter}"}} {v}\n',
                                 "utf-8",
                             )
                         )
