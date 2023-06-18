@@ -21,8 +21,12 @@ class Solar:
         for p in info["sites"]["site"]:
             sites.append(p["id"])
         self.sites = sites
+        self.cache = {"valid_until": 0}
 
     def pull(self):
+        if time.time() < self.cache["valid_until"]:
+            return self.cache["data"]
+
         data = {}
         for site in self.sites:
             to_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -35,6 +39,9 @@ class Solar:
 
             for meter in d["powerDetails"]["meters"]:
                 data[site][meter["type"]] = meter["values"]
+
+        self.cache["data"] = data
+        self.cache["valid_until"] = time.time() + 300
         return data
 
 
@@ -63,22 +70,6 @@ def get_metrics_class(solar):
             for site in data:
                 for meter in data[site]:
                     data[site][meter].sort(key=lambda x: x["date"])
-
-                    for measurement in data[site][meter]:
-                        ts = datetime.datetime.strptime(
-                            measurement["date"], "%Y-%m-%d %H:%M:%S"
-                        ).timestamp()
-
-                        v = 0
-                        if "value" in measurement:
-                            v = measurement["value"]
-
-                        self.wfile.write(
-                            bytes(
-                                f'solar_production{{site="{site}", meter="{meter}"}} {v} {ts}\n',
-                                "utf-8",
-                            )
-                        )
 
                     if len(data[site][meter]):
                         measurement = data[site][meter][-1]
