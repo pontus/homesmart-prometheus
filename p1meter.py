@@ -67,6 +67,9 @@ class Meters(zeroconf.ServiceListener):
         metrics["active_voltage_l3_v"] = prometheus_client.metrics.Gauge(
             "active_voltage_l3_v", "Current voltage import L3", ["unique_id"]
         )
+        metrics["active_current_a"] = prometheus_client.metrics.Gauge(
+            "active_current_a", "Current current import", ["unique_id"]
+        )
         metrics["active_current_l1_a"] = prometheus_client.metrics.Gauge(
             "active_current_l1_a", "Current current import L1", ["unique_id"]
         )
