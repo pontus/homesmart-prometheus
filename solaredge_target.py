@@ -14,10 +14,10 @@ import json
 
 class Solar:
     def __init__(self, apikey):
-        self.api = solaredge.Solaredge(apikey)
+        self.api = solaredge.MonitoringClient(apikey)
 
         sites = []
-        info = self.api.get_list()
+        info = self.api.get_site_list()
         for p in info["sites"]["site"]:
             sites.append(p["id"])
         self.sites = sites
@@ -29,10 +29,8 @@ class Solar:
 
         data = {}
         for site in self.sites:
-            to_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            from_time = (datetime.datetime.now() - datetime.timedelta(days=3)).strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+            to_time = datetime.datetime.now()
+            from_time = (datetime.datetime.now() - datetime.timedelta(days=3))
 
             d = self.api.get_power_details(site, from_time, to_time)
             data[site] = {}
@@ -69,10 +67,16 @@ def get_metrics_class(solar):
 
             for site in data:
                 for meter in data[site]:
-                    data[site][meter].sort(key=lambda x: x["date"])
+                    consider = list(
+                        filter(
+                            lambda x: "value" in x and "date" in x, data[site][meter]
+                        )
+                    )
 
-                    if len(data[site][meter]):
-                        measurement = data[site][meter][-1]
+                    consider.sort(key=lambda x: x["date"])
+
+                    if len(consider):
+                        measurement = consider[-1]
                         v = 0
                         if "value" in measurement:
                             v = measurement["value"]
