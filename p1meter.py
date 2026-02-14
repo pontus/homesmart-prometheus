@@ -77,7 +77,7 @@ class Meters(zeroconf.ServiceListener):
             "active_current_l2_a", "Current current import L2", ["unique_id"]
         )
         metrics["active_current_l3_a"] = prometheus_client.metrics.Gauge(
-            "active_current_l3_w", "Current current import L3", ["unique_id"]
+            "active_current_l3_a", "Current current import L3", ["unique_id"]
         )
 
     def async_update_service(
